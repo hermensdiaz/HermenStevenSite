@@ -15,3 +15,7 @@
 ### Ideas
 - Hacer un juego 2d online desde el navegador.
 - Hacer un menú 3d en el que se pueda configurar un objeto 3d por ejemplo una taza 3d que pueda cambiar de color, textura y diseño al hacer clicks en botones.  
+
+### Aprendizaje del diseño de la calidad del software
+- Requisitos y diseño (es lo importante).
+
