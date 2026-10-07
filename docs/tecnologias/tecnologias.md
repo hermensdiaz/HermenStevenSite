@@ -16,6 +16,3 @@ La documentación está escrita en JS.
 ### JS
 
 ### Typescript
-
-### Git
-
