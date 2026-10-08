@@ -1,0 +1,175 @@
+{
+	"frames": {
+		"brown-don.png": {
+			"frame": {
+				"x": 0,
+				"y": 0,
+				"w": 146,
+				"h": 146
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 146,
+				"h": 146
+			},
+			"sourceSize": {
+				"w": 146,
+				"h": 146
+			}
+		},
+		"candy-3.png": {
+			"frame": {
+				"x": 146,
+				"y": 0,
+				"w": 214,
+				"h": 99
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 214,
+				"h": 99
+			},
+			"sourceSize": {
+				"w": 214,
+				"h": 99
+			}
+		},
+		"candy-4.png": {
+			"frame": {
+				"x": 146,
+				"y": 99,
+				"w": 214,
+				"h": 99
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 214,
+				"h": 99
+			},
+			"sourceSize": {
+				"w": 214,
+				"h": 99
+			}
+		},
+		"candy1.png": {
+			"frame": {
+				"x": 360,
+				"y": 0,
+				"w": 175,
+				"h": 337
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 175,
+				"h": 337
+			},
+			"sourceSize": {
+				"w": 175,
+				"h": 337
+			}
+		},
+		"candy2.png": {
+			"frame": {
+				"x": 0,
+				"y": 337,
+				"w": 214,
+				"h": 98
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 214,
+				"h": 98
+			},
+			"sourceSize": {
+				"w": 214,
+				"h": 98
+			}
+		},
+		"green-cone.png": {
+			"frame": {
+				"x": 214,
+				"y": 337,
+				"w": 102,
+				"h": 179
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 102,
+				"h": 179
+			},
+			"sourceSize": {
+				"w": 102,
+				"h": 179
+			}
+		},
+		"pink-cone.png": {
+			"frame": {
+				"x": 316,
+				"y": 337,
+				"w": 102,
+				"h": 179
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 102,
+				"h": 179
+			},
+			"sourceSize": {
+				"w": 102,
+				"h": 179
+			}
+		},
+		"pink-don.png": {
+			"frame": {
+				"x": 418,
+				"y": 337,
+				"w": 146,
+				"h": 146
+			},
+			"rotated": false,
+			"trimmed": false,
+			"spriteSourceSize": {
+				"x": 0,
+				"y": 0,
+				"w": 146,
+				"h": 146
+			},
+			"sourceSize": {
+				"w": 146,
+				"h": 146
+			}
+		}
+	},
+	"meta": {
+		"app": "http://www.codeandweb.com/texturepacker",
+		"version": "1.0",
+		"image": "spritesheet.png",
+		"format": "RGBA8888",
+		"size": {
+			"w": 564,
+			"h": 516
+		},
+		"scale": "1"
+	}
+}
