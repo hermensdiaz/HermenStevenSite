@@ -16,4 +16,4 @@ Hay mamuts que caen del cielo y es necesario atraparlos.
 - RNF-003-A: El sitema permite que aparezca un vídeo con mamuts enojados cuando suba la dificultad, cada 20 mamuts atrapados aparece un mamut más molesto.
 - RNF-003-B: El sistema permite que al subir la dificultad a 20 mamuts atrapados aparezcan mamuts exposivos que el jugador debe evitar y mamuts buenos que el jugador debe atrapar.
 - RNF-003-C: El sistema permite que los mamuts explosivos sean de color rojo y hagan una animación al explotar.
-- RNF-004: El sistema permite finalizar el juego cuando jugador recoge un mamut explosivo o cuando pierde 3 mamuts
+- RNF-004: El sistema permite finalizar el juego cuando jugador recoge un mamut explosivo o cuando pierde 3 mamuts.
