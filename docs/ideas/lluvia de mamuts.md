@@ -8,6 +8,10 @@ Hay mamuts que caen del cielo y es necesario atraparlos.
 - RF-002: El sistema permite atrapar los mamuts.
 - RF-003: El sistema permite mostrar la puntuación del jugador.
 - RF-004: El sistema permite subir la dificultad.
+- RF-005: El sistema permite escuchar reproducir música tranquila al iniciar
+- RF-006: El sistema permite escuchar música de YARA YARA al subir de dificultad
+- RF-007: El sistema permite sistema permite escuchar una música que indica que el juego ya es el más difícil
+- RF-008: El sistema permite agitar la pantalla mientras emerge un mamut al subir de dificultad
 
 ### Requisitos No Funcionales
 - RNF-001: El sistema permite que los mamuts sean circulares y giren.
