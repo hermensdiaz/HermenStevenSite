@@ -25,3 +25,10 @@ Hay mamuts que caen del cielo y es necesario atraparlos.
 ### Recursos
 Vídeo en YouTube: 
 https://youtu.be/HdEwhTcei2k?si=AsE43j6spSWQorjk
+
+### Sugerencias de personas
+- Es posible dar un doble salto
+- Malvaviscos en el suelo que bloqueen el paso de la taza
+- Los mamuts no atrapados permanecen aplastados en el suelo y al saltar sobre ellos se aplastan aún más
+
+Nota: no todas las sugerencias son buenas, ni todas son malas.
