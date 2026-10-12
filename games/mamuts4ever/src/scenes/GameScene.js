@@ -12,7 +12,7 @@ export class GameScene extends Phaser.Scene {
         // Load assets
         this.load.image('background', 'assets/images/background.jpg');
         this.load.image('cup', 'assets/images/cup.png');
-        this.load.image('mamut', 'assets/images/mamut.png');
+        this.load.image('mamut', 'assets/images/mamut_crema.png');
 
     }
 
@@ -51,7 +51,7 @@ export class GameScene extends Phaser.Scene {
         }
     }
     spawnRandomMamut() {
-        this.physics.add.image(Phaser.Math.RND.between(50, this.scale.width - 50), -20, 'mamut');
+        this.physics.add.image(Phaser.Math.RND.between(50, this.scale.width - 50), -20, 'mamut').setScale(0.5);
     }
 
 }
