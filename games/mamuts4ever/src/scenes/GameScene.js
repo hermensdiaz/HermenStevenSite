@@ -10,7 +10,7 @@ export class GameScene extends Phaser.Scene {
 
     preload() {
         // Load assets
-        this.load.image('background', 'assets/images/background.jpg');
+        this.load.image('background', 'assets/images/aurabackground.png');
         this.load.image('cup', 'assets/images/cup.png');
         // this.load.image('mamut', 'assets/images/mamut_crema.png');
         this.load.atlas('mamuts', 'assets/spritesheets/any_mamuts.png', 'assets/spritesheets/mamuts_spritesheet.json');
@@ -49,9 +49,9 @@ export class GameScene extends Phaser.Scene {
 
     update() {
         if(this.cursorKeys.left.isDown) {
-            this.cup.setVelocityX(-400);
+            this.cup.setVelocityX(-500);
         } else if(this.cursorKeys.right.isDown) {
-            this.cup.setVelocityX(400);
+            this.cup.setVelocityX(500);
         } else {
             this.cup.setVelocityX(0);
         }
