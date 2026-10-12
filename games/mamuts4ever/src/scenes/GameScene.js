@@ -12,7 +12,8 @@ export class GameScene extends Phaser.Scene {
         // Load assets
         this.load.image('background', 'assets/images/background.jpg');
         this.load.image('cup', 'assets/images/cup.png');
-        this.load.image('mamut', 'assets/images/mamut_crema.png');
+        // this.load.image('mamut', 'assets/images/mamut_crema.png');
+        this.load.atlas('mamuts', 'assets/spritesheets/any_mamuts.png', 'assets/spritesheets/mamuts_spritesheet.json');
 
     }
 
@@ -31,6 +32,8 @@ export class GameScene extends Phaser.Scene {
 
         // input
         this.cursorKeys = this.input.keyboard.createCursorKeys();
+
+        this.physics.add.image(50, 0, 'mamuts')
 
         this.time.addEvent({
             delay: 1000,
@@ -51,7 +54,7 @@ export class GameScene extends Phaser.Scene {
         }
     }
     spawnRandomMamut() {
-        this.physics.add.image(Phaser.Math.RND.between(50, this.scale.width - 50), -20, 'mamut').setScale(0.5);
+        // this.physics.add.image(Phaser.Math.RND.between(50, this.scale.width - 50), -20, 'mamuts').setScale(0.5);
     }
 
 }
