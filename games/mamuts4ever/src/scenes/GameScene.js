@@ -11,6 +11,7 @@ export class GameScene extends Phaser.Scene {
     preload() {
         // Load assets
         this.load.image('background', 'assets/images/aurabackground.png');
+        this.load.image('hardfondo', 'assets/images/hardaurabackground.png');
         this.load.image('cup', 'assets/images/cup.png');
         // this.load.image('mamut', 'assets/images/mamut_crema.png');
         this.load.atlas('mamuts', 'assets/spritesheets/any_mamuts.png', 'assets/spritesheets/mamuts_spritesheet.json');
@@ -23,13 +24,14 @@ export class GameScene extends Phaser.Scene {
         this.sound.play('fondomusic', {
             volume: 0.5,
         })
+        this.faseHard = false;
         this.score = 0;
         // Create game objects
         const gameW = this.scale.width;
         const gameH = this.scale.height;
 
         // add player cup
-        this.add.image(gameW/2, gameH/2, 'background');
+        this.fondoInicial = this.add.image(gameW/2, gameH/2, 'background');
         this.cup = this.physics.add.image(gameW/2, gameH - 80, 'cup');
         // this.cup.scaleX = 0.1;
         // this.cup.scaleY = 0.1;
@@ -71,6 +73,29 @@ export class GameScene extends Phaser.Scene {
             }
         });
     }
+
+    handleCupMamutsCollision(cup, mamuts) {
+        mamuts.disableBody(true, true);
+        this.score += 10;
+        console.log(this.score);
+        this.sound.play('pop', {
+            volume: 0.5,
+        })
+        if(this.score > 100 && !this.faseHard){
+            this.faseHard = true;
+            this.sound.stopByKey('fondomusic');
+            this.sound.play('hardmusic', {
+                loop: true,
+            });
+            if(this.fondoInicial){
+                this.fondoInicial.destroy();
+            }
+            let fondo = this.add.image(this.scale.width/2, this.scale.height/2, 'hardfondo');
+            fondo.setDepth(-1);
+        }
+    }
+
+
     spawnRandomMamut() {
         // const mamutsFrame = Phaser.Utils.Array.GetRandom(this.mamutsFrames);
         const mamuts = this.mamutsGroup.getFirstDead(true, Phaser.Math.RND.between(50, this.scale.width - 50), -20, 'mamuts');
@@ -85,19 +110,6 @@ export class GameScene extends Phaser.Scene {
         console.log(this.mamutsGroup.getChildren().length);
     }
 
-    handleCupMamutsCollision(cup, mamuts) {
-        mamuts.disableBody(true, true);
-        this.score += 10;
-        console.log(this.score);
-        this.sound.play('pop', {
-            volume: 0.5,
-        })
-        if(this.score > 100){
-            this.sound.stopByKey('fondomusic');
-            this.sound.play('hardmusic');
-        }
-    }
 
-    
 
 }
