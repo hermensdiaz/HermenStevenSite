@@ -14,10 +14,16 @@ export class GameScene extends Phaser.Scene {
         this.load.image('cup', 'assets/images/cup.png');
         // this.load.image('mamut', 'assets/images/mamut_crema.png');
         this.load.atlas('mamuts', 'assets/spritesheets/any_mamuts.png', 'assets/spritesheets/mamuts_spritesheet.json');
-
+        this.load.audio('pop', 'assets/audio/pop.mp3');
+        this.load.audio('fondomusic', 'assets/audio/Aura pops_close eyes.mp3');
+        this.load.audio('hardmusic', 'assets/audio/yaraya.mp3');
     }
 
     create() {
+        this.sound.play('fondomusic', {
+            volume: 0.5,
+        })
+        this.score = 0;
         // Create game objects
         const gameW = this.scale.width;
         const gameH = this.scale.height;
@@ -80,7 +86,18 @@ export class GameScene extends Phaser.Scene {
     }
 
     handleCupMamutsCollision(cup, mamuts) {
-        // console.log(mamuts);
         mamuts.disableBody(true, true);
+        this.score += 10;
+        console.log(this.score);
+        this.sound.play('pop', {
+            volume: 0.5,
+        })
+        if(this.score > 100){
+            this.sound.stopByKey('fondomusic');
+            this.sound.play('hardmusic');
+        }
     }
+
+    
+
 }
