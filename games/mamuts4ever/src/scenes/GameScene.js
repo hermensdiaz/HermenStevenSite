@@ -33,7 +33,9 @@ export class GameScene extends Phaser.Scene {
         // input
         this.cursorKeys = this.input.keyboard.createCursorKeys();
 
-        this.physics.add.image(50, 0, 'mamuts')
+        // this.physics.add.image(50, 0, 'mamuts');
+
+        this.mamutsFrames = this.textures.get("mamuts").getFrameNames();
 
         this.time.addEvent({
             delay: 1000,
@@ -54,7 +56,7 @@ export class GameScene extends Phaser.Scene {
         }
     }
     spawnRandomMamut() {
-        // this.physics.add.image(Phaser.Math.RND.between(50, this.scale.width - 50), -20, 'mamuts').setScale(0.5);
+        this.physics.add.image(Phaser.Math.RND.between(50, this.scale.width - 50), -20, 'mamuts', Phaser.Utils.Array.GetRandom(this.mamutsFrames)).setScale(0.5);
     }
 
 }
