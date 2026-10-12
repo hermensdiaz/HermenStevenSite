@@ -49,9 +49,22 @@ export class GameScene extends Phaser.Scene {
             callback: this.spawnRandomMamut, 
             callbackScope: this,
         })
-
+        // detección de colisiones
         this.physics.add.overlap(this.cup, this.mamutsGroup, this.handleCupMamutsCollision, null, this);
         
+        // ui
+        const scorePrefix = this.add.text(10, 10, 'Score: ',{
+            fontSize: '40px',
+            color: '#043D8C',
+            strokeThickness: 6,
+        });
+
+        this.scoreText = this.add.text(scorePrefix.x + scorePrefix.width, 10, '0',{
+            fontSize: '40px',
+            color: '#043D8C',
+            strokeThickness: 6,
+        });
+
 
     }
 
@@ -77,11 +90,12 @@ export class GameScene extends Phaser.Scene {
     handleCupMamutsCollision(cup, mamuts) {
         mamuts.disableBody(true, true);
         this.score += 10;
+        this.scoreText.setText(this.score.toString(10))
         console.log(this.score);
         this.sound.play('pop', {
             volume: 0.5,
         })
-        if(this.score > 100 && !this.faseHard){
+        if(this.score >= 100 && !this.faseHard){
             this.faseHard = true;
             this.sound.stopByKey('fondomusic');
             this.sound.play('hardmusic', {
