@@ -52,11 +52,25 @@ export class GameScene extends Phaser.Scene {
         } else {
             this.cup.setVelocityX(0);
         }
+
+        this.mamutsGroup.getChildren().forEach((child) => {
+            if(!child.active) {
+                return; 
+            }
+            if(child.y > this.scale.height + 10) {
+                child.setActive(false).setVisible(false);
+            }
+        });
     }
     spawnRandomMamut() {
-        const mamutsFrame = Phaser.Utils.Array.GetRandom(this.mamutsFrames);
-        const mamuts = this.mamutsGroup.getFirstDead(true, Phaser.Math.RND.between(50, this.scale.width - 50), -20, 'mamuts', mamutsFrame);
-        mamuts.setScale(0.5);
+        // const mamutsFrame = Phaser.Utils.Array.GetRandom(this.mamutsFrames);
+        const mamuts = this.mamutsGroup.getFirstDead(true, Phaser.Math.RND.between(50, this.scale.width - 50), -20, 'mamuts');
+        mamuts
+            .setScale(0.5)
+            .setActive(true)
+            .setVisible(true)
+            .setVelocity(0)
+            .setFrame(Phaser.Utils.Array.GetRandom(this.mamutsFrames));
         // this.physics.add.image(Phaser.Math.RND.between(50, this.scale.width - 50), -20, 'mamuts', Phaser.Utils.Array.GetRandom(this.mamutsFrames)).setScale(0.5);
         console.log(this.mamutsGroup.getChildren().length);
     }
