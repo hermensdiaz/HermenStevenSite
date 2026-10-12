@@ -42,6 +42,9 @@ export class GameScene extends Phaser.Scene {
             callbackScope: this,
         })
 
+        this.physics.add.overlap(this.cup, this.mamutsGroup, this.handleCupMamutsCollision, null, this);
+        
+
     }
 
     update() {
@@ -70,9 +73,14 @@ export class GameScene extends Phaser.Scene {
             .setActive(true)
             .setVisible(true)
             .setVelocity(0)
-            .setFrame(Phaser.Utils.Array.GetRandom(this.mamutsFrames));
+            .setFrame(Phaser.Utils.Array.GetRandom(this.mamutsFrames))
+            .enableBody();
         // this.physics.add.image(Phaser.Math.RND.between(50, this.scale.width - 50), -20, 'mamuts', Phaser.Utils.Array.GetRandom(this.mamutsFrames)).setScale(0.5);
         console.log(this.mamutsGroup.getChildren().length);
     }
 
+    handleCupMamutsCollision(cup, mamuts) {
+        // console.log(mamuts);
+        mamuts.disableBody(true, true);
+    }
 }
