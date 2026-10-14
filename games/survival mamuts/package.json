@@ -1,0 +1,6 @@
+{
+  "name": "mamut-dulce-apocalipsis",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": { "start": "npx serve ." }
+}
