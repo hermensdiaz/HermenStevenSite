@@ -16,3 +16,6 @@ Así que, si el Hijo os libertare, seréis verdaderamente libres.
 ### Juan 8:44
 Vosotros sois de vuestro padre el diablo, y los deseos de vuestro padre queréis hacer. El ha sigo homicida desde el principio, y no ha permanecido en la verdad, porque no hay verdad en él. Cuando habla mentira, de suyo habla; porque es mentiroso, y padre de mentira.
 
+### Juan 8:47
+El que es de Dios, las palabras de Dios oye; por esto no las oís vosotros, porque no sois de Dios.
+
