@@ -13,3 +13,6 @@ Otra vez Jesús les habló, diciendo: Yo soy la luz del mundo; el que me sigue, 
 ### Juan 8:36
 Así que, si el Hijo os libertare, seréis verdaderamente libres.
 
+### Juan 8:44
+Vosotros sois de vuestro padre el diablo, y los deseos de vuestro padre queréis hacer. El ha sigo homicida desde el principio, y no ha permanecido en la verdad, porque no hay verdad en él. Cuando habla mentira, de suyo habla; porque es mentiroso, y padre de mentira.
+
