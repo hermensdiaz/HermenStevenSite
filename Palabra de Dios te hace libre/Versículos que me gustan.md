@@ -10,3 +10,6 @@ Otra vez Jesús les habló, diciendo: Yo soy la luz del mundo; el que me sigue, 
 31 Dijo entonces Jesús a los judíos que habían creído en él: Si vosotros permaneciereis en mi palabra, seréis verdaderamente mis discípulos;
 32 y conoceréis la verdad, y la verdad os hará libres.
 
+### Juan 8:36
+Así que, si el Hijo os libertare, seréis verdaderamente libres.
+
