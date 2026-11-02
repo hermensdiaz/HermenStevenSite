@@ -7,28 +7,33 @@ window.LOBBY_CONFIG = {
   siteName: "Mi Sitio",
 
   sections: [
+    /* ---- Juegos ----
+       Las rutas son relativas a la carpeta lobby/, por eso empiezan con "../".
+       El espacio de "survival mamuts" va como %20 para que funcione en cualquier servidor. */
     {
-      id: "videojuegos",
-      title: "Videojuegos",
-      subtitle: "Juega y explora",
-      icon: "🎮",
-      url: "videojuegos.html",
+      id: "mamuts4ever",
+      title: "Mamuts4ever",
+      subtitle: "Jugar ahora",
+      icon: "🦣",
+      url: "../games/mamuts4ever/index.html",
       color: "#6c3fc9"
     },
+    {
+      id: "survival-mamuts",
+      title: "Survival Mamuts",
+      subtitle: "Jugar ahora",
+      icon: "🏹",
+      url: "../games/survival%20mamuts/index.html",
+      color: "#1f7a5a"
+    },
+
+    /* ---- Otras secciones (cambia sus url cuando existan) ---- */
     {
       id: "proyectos",
       title: "Proyectos",
       subtitle: "Lo que he construido",
       icon: "🛠️",
       url: "proyectos.html",
-      color: "#1f7a5a"
-    },
-    {
-      id: "galeria",
-      title: "Galería 3D",
-      subtitle: "Modelos y renders",
-      icon: "🖼️",
-      url: "galeria.html",
       color: "#b5532a"
     },
     {

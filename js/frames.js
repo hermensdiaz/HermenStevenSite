@@ -146,7 +146,12 @@ Lobby.buildFrames = function (scene, M, S, sections) {
     ctx.fillStyle = "#ffffff";
     ctx.shadowColor = "rgba(0,0,0,0.5)";
     ctx.shadowBlur = 12;
-    ctx.font = "700 74px 'Trebuchet MS', 'Segoe UI', sans-serif";
+    // el título se achica si es muy largo para el cuadro
+    let size = 74;
+    do {
+      ctx.font = `700 ${size}px 'Trebuchet MS', 'Segoe UI', sans-serif`;
+      size -= 2;
+    } while (ctx.measureText(sec.title).width > w * 0.86 && size > 30);
     ctx.fillText(sec.title, w / 2, h * 0.68);
     ctx.font = "400 36px 'Trebuchet MS', 'Segoe UI', sans-serif";
     ctx.fillStyle = "rgba(255,255,255,0.85)";
