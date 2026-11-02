@@ -1,17 +1,75 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Sitio clausurado</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Lobby</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-    <main>
-        <img src="resources/images/nofound.png" alt="Sitio clausurado">
-        <a href="games/mamuts4ever/index.html" class="boton">Jugar Lluvia de Mamuts</a>
-        <a href="games\survival mamuts\index.html" class="boton">Jugar Survival Mamuts</a>
-    </main>
-    <script src="script.js"></script>
+  <canvas id="renderCanvas" touch-action="none" aria-label="Lobby 3D navegable"></canvas>
+
+  <!-- Pantalla de carga -->
+  <div id="loader">
+    <div class="loader-box">
+      <div class="beam"></div>
+      <p>Construyendo el lobby…</p>
+    </div>
+  </div>
+
+  <!-- Cabecera -->
+  <header class="hud-top">
+    <h1 id="siteName">Mi Sitio</h1>
+    <span class="tag">Lobby</span>
+  </header>
+
+  <!-- Menú de secciones -->
+  <nav class="menu" aria-label="Secciones">
+    <details open>
+      <summary>Secciones</summary>
+      <ul id="menuList"></ul>
+    </details>
+  </nav>
+
+  <!-- Ayuda de controles -->
+  <div id="hint">
+    <div class="hint-desktop">
+      <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> caminar</span>
+      <span><b>Arrastra</b> para mirar</span>
+      <span><b>Clic</b> en un cuadro para entrar</span>
+    </div>
+    <div class="hint-touch">
+      <span>Joystick para caminar · arrastra para mirar · toca un cuadro</span>
+    </div>
+  </div>
+
+  <!-- Tooltip al pasar sobre un cuadro -->
+  <div id="tip" role="status" aria-live="polite"></div>
+
+  <!-- Aviso al estar frente a un cuadro -->
+  <div id="near"></div>
+
+  <!-- Joystick táctil -->
+  <div id="joystick" aria-hidden="true"><div class="knob"></div></div>
+
+  <!-- Transición al entrar a una sección -->
+  <div id="fade">
+    <div class="fade-icon"></div>
+    <div class="fade-title"></div>
+    <div class="fade-sub">Entrando…</div>
+  </div>
+
+  <!-- Babylon.js -->
+  <script src="https://cdn.jsdelivr.net/npm/babylonjs@7.54.0/babylon.js"></script>
+
+  <!-- Lobby -->
+  <script src="js/config.js"></script>
+  <script src="js/materials.js"></script>
+  <script src="js/structure.js"></script>
+  <script src="js/frames.js"></script>
+  <script src="js/controls.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>

@@ -1,1 +1,0 @@
-// Sin funcionalidad: la página está clausurada.

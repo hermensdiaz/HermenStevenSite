@@ -1,0 +1,280 @@
+/* =========================================================
+   ESTILOS DEL LOBBY
+   ========================================================= */
+:root {
+  --wood-dark: #2b1707;
+  --wood: #6b3f15;
+  --wood-light: #c58b4a;
+  --cream: #f6ead7;
+  --gold: #e3b860;
+  --glass: rgba(30, 17, 6, 0.62);
+  --glass-border: rgba(227, 184, 96, 0.35);
+  --radius: 14px;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-ui: "Inter", system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #9fc4e0;
+  font-family: var(--font-ui);
+  color: var(--cream);
+  -webkit-font-smoothing: antialiased;
+}
+
+#renderCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  outline: none;
+  cursor: grab;
+  touch-action: none;
+}
+#renderCanvas.grabbing { cursor: grabbing; }
+#renderCanvas.pointer { cursor: pointer; }
+
+/* ---------- Carga ---------- */
+#loader {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 40%, #4a2a0f, #1c0f04);
+  transition: opacity 0.8s ease, visibility 0.8s;
+}
+#loader.done { opacity: 0; visibility: hidden; }
+.loader-box { text-align: center; }
+.loader-box p { font-family: var(--font-display); font-size: 1.15rem; margin-top: 18px; color: var(--gold); }
+.beam {
+  width: 160px; height: 10px; border-radius: 5px;
+  background: linear-gradient(90deg, var(--wood) 0%, var(--wood-light) 50%, var(--wood) 100%);
+  background-size: 200% 100%;
+  animation: beam 1.2s linear infinite;
+}
+@keyframes beam { to { background-position: -200% 0; } }
+
+/* ---------- Cabecera ---------- */
+.hud-top {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+.hud-top h1 { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; letter-spacing: 0.01em; }
+.tag {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.14em;
+  padding: 3px 9px; border-radius: 999px;
+  background: var(--gold); color: var(--wood-dark); font-weight: 600;
+}
+
+/* ---------- Menú ---------- */
+.menu {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 10;
+  width: 230px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+.menu summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 12px 16px;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.menu summary::-webkit-details-marker { display: none; }
+.menu summary::after { content: "▾"; color: var(--gold); transition: transform 0.2s; }
+.menu details:not([open]) summary::after { transform: rotate(-90deg); }
+.menu ul { list-style: none; padding: 0 8px 10px; }
+.menu li { display: flex; align-items: center; gap: 4px; }
+.menu .go {
+  flex: 1;
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 8px;
+  border: 0; border-radius: 9px;
+  background: transparent;
+  color: var(--cream);
+  font: 500 0.92rem var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.menu .go:hover, .menu .go:focus-visible { background: rgba(227, 184, 96, 0.16); outline: none; }
+.menu .num {
+  width: 20px; height: 20px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.72rem; color: var(--gold);
+}
+.menu .ic { width: 20px; text-align: center; }
+.menu a {
+  width: 30px; height: 30px; display: grid; place-items: center;
+  border-radius: 8px; color: var(--gold); text-decoration: none;
+}
+.menu a:hover, .menu a:focus-visible { background: rgba(227, 184, 96, 0.16); outline: none; }
+
+/* ---------- Ayuda ---------- */
+#hint {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  padding: 10px 18px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.6s, transform 0.6s;
+  pointer-events: none;
+  white-space: nowrap;
+}
+#hint.hidden { opacity: 0; transform: translate(-50%, 12px); }
+.hint-desktop { display: flex; gap: 18px; }
+.hint-touch { display: none; }
+kbd {
+  display: inline-block;
+  min-width: 22px;
+  padding: 1px 6px;
+  margin-right: 2px;
+  border-radius: 5px;
+  background: var(--cream);
+  color: var(--wood-dark);
+  font: 600 0.75rem var(--font-ui);
+  text-align: center;
+  box-shadow: 0 2px 0 var(--wood-light);
+}
+
+/* ---------- Tooltip y aviso ---------- */
+#tip {
+  position: fixed;
+  top: var(--ty, 50%);
+  left: var(--tx, 50%);
+  transform: translate(18px, 26px);
+  z-index: 10;
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px;
+  background: var(--glass);
+  border: 1px solid var(--gold);
+  border-radius: var(--radius);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s;
+}
+#tip.show { opacity: 1; }
+.tip-icon { font-size: 1.6rem; }
+#tip strong { display: block; font-family: var(--font-display); font-size: 1.05rem; }
+#tip small { color: var(--gold); font-size: 0.75rem; }
+
+#near {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translate(-50%, 10px);
+  z-index: 10;
+  padding: 8px 16px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  white-space: nowrap;
+}
+#near.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- Joystick ---------- */
+#joystick {
+  display: none;
+  position: fixed;
+  left: 28px;
+  bottom: 36px;
+  z-index: 12;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(30, 17, 6, 0.4);
+  border: 2px solid var(--glass-border);
+  touch-action: none;
+}
+#joystick .knob {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 35% 35%, var(--gold), var(--wood));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* ---------- Transición ---------- */
+#fade {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: radial-gradient(circle at 50% 45%, #4a2a0f, #140a02);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.6s ease, visibility 0.6s;
+}
+#fade.show { opacity: 1; visibility: visible; }
+.fade-icon { font-size: 3.6rem; }
+.fade-title { font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; }
+.fade-sub { color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; font-size: 0.75rem; }
+
+/* ---------- Táctil / móvil ---------- */
+@media (hover: none) and (pointer: coarse) {
+  #joystick { display: block; }
+  .hint-desktop { display: none; }
+  .hint-touch { display: block; }
+  #hint { bottom: 170px; white-space: normal; text-align: center; max-width: 86vw; border-radius: var(--radius); }
+  #near { bottom: 170px; }
+}
+
+@media (max-width: 640px) {
+  .hud-top { top: auto; bottom: 18px; left: auto; right: 16px; transform: none; padding: 8px 14px; }
+  .hud-top h1 { font-size: 1rem; }
+  .menu { top: 12px; left: 12px; width: min(230px, calc(100vw - 24px)); }
+  .menu details:not([open]) { width: auto; }
+  #near { font-size: 0.78rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
