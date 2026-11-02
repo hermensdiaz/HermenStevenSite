@@ -15,7 +15,7 @@ window.LOBBY_CONFIG = {
       title: "Mamuts4ever",
       subtitle: "Jugar ahora",
       icon: "🦣",
-      url: "../games/mamuts4ever/index.html",
+      url: "../../games/mamuts4ever/index.html",
       color: "#9b8cff"
     },
     {
@@ -23,7 +23,7 @@ window.LOBBY_CONFIG = {
       title: "Survival Mamuts",
       subtitle: "Jugar ahora",
       icon: "🏹",
-      url: "../games/survival%20mamuts/index.html",
+      url: "../../games/survival%20mamuts/index.html",
       color: "#5cc98a"
     },
 
