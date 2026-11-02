@@ -51,28 +51,8 @@ Lobby.buildDecor = function (scene, M, S, shadowGen) {
   plant("plant2", X0 + 0.5, ZF + 0.5, 0.9);
   plant("plant3", X1 - 0.6, 0.9, 0.9);
 
-  /* ---------- Árboles y arbustos alrededor ---------- */
-  const tree = (n, x, z, s) => {
-    const gy = -D.stilt;
-    const trunk = BABYLON.MeshBuilder.CreateCylinder(n + "_t",
-      { height: 2.6 * s, diameterTop: 0.35 * s, diameterBottom: 0.55 * s, tessellation: 12 }, scene);
-    trunk.position.set(x, gy + 1.3 * s, z);
-    put(trunk, M.trunk);
-    ball(n + "_c1", 3.0 * s, x, gy + 3.4 * s, z, M.leaf, 0.95);
-    ball(n + "_c2", 2.2 * s, x + 0.9 * s, gy + 4.3 * s, z + 0.2 * s, M.leaf2);
-    ball(n + "_c3", 2.0 * s, x - 0.9 * s, gy + 4.0 * s, z - 0.3 * s, M.leaf);
-  };
-  [
-    [-19, -9, 1.2], [-23, 5, 1.4], [-15, 13, 1.1], [-3, 15, 1.3],
-    [9, 16, 1.2], [21, 9, 1.4], [24, -5, 1.1], [-7, -16, 1.3], [7, -18, 1.0], [-28, -2, 1.0]
-  ].forEach(([x, z, s], i) => tree("tree" + i, x, z, s));
-
-  [
-    [-14, -6], [-10, -8], [3, -9], [-2, -11], [16, -11], [-17, 8], [14, 8], [26, 1], [0, 9]
-  ].forEach(([x, z], i) => {
-    ball("bush" + i, 1.4, x, -D.stilt + 0.4, z, i % 2 ? M.leaf : M.leaf2, 0.65);
-    ball("bushb" + i, 1.0, x + 0.7, -D.stilt + 0.3, z + 0.3, M.leaf2, 0.65);
-  });
+  
+  // (los árboles y arbustos de afuera ahora los coloca world.js)
 
   M.pot.backFaceCulling = false; // la pantalla de la lámpara es una media esfera
 

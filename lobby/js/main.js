@@ -8,7 +8,7 @@
 
   /* ---------- UI (HUD, tooltip, menú, transición) ---------- */
   const $ = (s) => document.querySelector(s);
-  const tip = $("#tip"), hint = $("#hint"), near = $("#near"), fade = $("#fade");
+  const tip = $("#tip"), hint = $("#hint"), near = $("#near"), fade = $("#fade"), blinkEl = $("#blink");
   document.title = cfg.siteName + " · Lobby";
   $("#siteName").textContent = cfg.siteName;
 
@@ -24,6 +24,15 @@
         near.innerHTML = `Pulsa <kbd>Enter</kbd> o haz clic para entrar a <strong>${sec.title}</strong>`;
         near.classList.add("show");
       } else near.classList.remove("show");
+    },
+    blink(cb) {
+      blinkEl.classList.add("show");
+      setTimeout(() => { cb(); setTimeout(() => blinkEl.classList.remove("show"), 120); }, 380);
+    },
+    setOutside(out) {
+      if (out === this._out) return;
+      this._out = out;
+      document.body.classList.toggle("outside", out);
     },
     transition(sec, cb) {
       fade.querySelector(".fade-title").textContent = sec.title;
@@ -67,7 +76,7 @@
   scene.clearColor = BABYLON.Color4.FromHexString("#fde7efff");
   scene.collisionsEnabled = true;
   scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
-  scene.fogDensity = 0.0035;
+  scene.fogDensity = 0.0016;
   scene.fogColor = BABYLON.Color3.FromHexString("#e4f1fb");
 
   Lobby.createSky(scene);
@@ -79,33 +88,55 @@
   hemi.groundColor = BABYLON.Color3.FromHexString("#e9b99a");
   hemi.specular = BABYLON.Color3.Black();
 
-  // sol suave que entra por los ventanales
+  /* ---------- Cámara: siempre empieza en la cabaña, frente a los cuadros ---------- */
+  const START = { pos: new BABYLON.Vector3(-12 + 3.2, 1.7, -2.7), rot: new BABYLON.Vector3(0.03, 0.25, 0) };
+  const camera = new BABYLON.UniversalCamera("cam", START.pos.clone(), scene);
+  camera.rotation.copyFrom(START.rot);
+  camera.fov = 1.05;
+  camera.maxZ = 3000;
+
+  // sol suave; sombras en cascada para cubrir todo el mapa
   const sun = new BABYLON.DirectionalLight("sun", new BABYLON.Vector3(0.35, -0.6, 0.72), scene);
   sun.position = new BABYLON.Vector3(-8, 16, -20);
   sun.intensity = 0.75;
   sun.diffuse = BABYLON.Color3.FromHexString("#fff1de");
   sun.specular = BABYLON.Color3.Black();
-  sun.shadowMinZ = 1;
-  sun.shadowMaxZ = 60;
-  const shadows = new BABYLON.ShadowGenerator(2048, sun);
-  shadows.usePercentageCloserFiltering = true;
-  shadows.filteringQuality = BABYLON.ShadowGenerator.QUALITY_HIGH;
-  shadows.setDarkness(0.45);          // sombras claras, estilo soft
-  shadows.bias = 0.001;
-  shadows.normalBias = 0.03;
+  // en celulares y tablets se baja un poco la calidad para que vaya fluido
+  const lowEnd = window.matchMedia("(pointer: coarse)").matches;
+  if (lowEnd) engine.setHardwareScalingLevel(Math.max(1, window.devicePixelRatio / 1.5));
+  let shadows;
+  if (engine.webGLVersion >= 2 && BABYLON.CascadedShadowGenerator) {
+    shadows = new BABYLON.CascadedShadowGenerator(lowEnd ? 1024 : 2048, sun);
+    shadows.numCascades = lowEnd ? 2 : 3;
+    shadows.shadowMaxZ = 260;
+    shadows.lambda = 0.82;
+    shadows.stabilizeCascades = true;
+    shadows.depthClamp = true;
+    shadows.autoCalcDepthBounds = false;
+    shadows.usePercentageCloserFiltering = true;
+    shadows.filteringQuality = BABYLON.ShadowGenerator.QUALITY_MEDIUM;
+    shadows.darkness = 0.45;
+    shadows.bias = 0.002;
+    shadows.normalBias = 0.03;
+  } else {
+    sun.shadowMinZ = 1;
+    sun.shadowMaxZ = 120;
+    shadows = new BABYLON.ShadowGenerator(2048, sun);
+    shadows.usePercentageCloserFiltering = true;
+    shadows.setDarkness(0.45);
+    shadows.bias = 0.001;
+    shadows.normalBias = 0.03;
+  }
 
   const M = Lobby.createMaterials(scene);
   const S = Lobby.buildStructure(scene, M, shadows);
   const decor = Lobby.buildDecor(scene, M, S, shadows);
   const frames = Lobby.buildFrames(scene, M, S, cfg.sections);
+  const world = Lobby.buildWorld(scene, shadows, S);
 
   /* ---------- Post-proceso soft: oclusión ambiental + tonos suaves ---------- */
-  const camera = new BABYLON.UniversalCamera("cam",
-    new BABYLON.Vector3(S.bounds.X0 + 3.2, 1.7, -2.7), scene);
-  camera.rotation.set(0.03, 0.25, 0);
-  camera.fov = 1.05;
 
-  if (BABYLON.SSAO2RenderingPipeline && BABYLON.SSAO2RenderingPipeline.IsSupported) {
+  if (!lowEnd && BABYLON.SSAO2RenderingPipeline && BABYLON.SSAO2RenderingPipeline.IsSupported) {
     const ssao = new BABYLON.SSAO2RenderingPipeline("ssao", scene, { ssaoRatio: 0.5, blurRatio: 0.5 }, [camera]);
     ssao.radius = 1.2;
     ssao.totalStrength = 1.1;
@@ -131,7 +162,31 @@
   pipe.bloomKernel = 48;
 
 
-  const controls = Lobby.setupControls(scene, canvas, camera, frames, ui);
+  const controls = Lobby.setupControls(scene, canvas, camera, frames, ui, world, S);
+
+  /* ---------- Menú del tour por las maravillas ---------- */
+  const tourList = $("#tourList");
+  const home = document.createElement("li");
+  home.innerHTML = `<button class="go" data-home="1"><span class="ic">🏠</span>Volver a la cabaña</button>`;
+  tourList.appendChild(home);
+  world.tour.forEach((t, i) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<button class="go" data-t="${i}"><span class="ic">${t.emoji}</span>${t.name}</button>`;
+    tourList.appendChild(li);
+  });
+  tourList.addEventListener("click", (e) => {
+    const b = e.target.closest(".go");
+    if (!b) return;
+    ui.hideHint();
+    if (b.dataset.home) {
+      const look = START.pos.add(new BABYLON.Vector3(Math.sin(START.rot.y), 0, Math.cos(START.rot.y)));
+      controls.teleport(START.pos, look);
+    } else {
+      const t = world.tour[+b.dataset.t];
+      controls.teleport(t.pos, t.target);
+    }
+    canvas.focus();
+  });
 
   menu.addEventListener("click", (e) => {
     const b = e.target.closest(".go");
@@ -156,5 +211,5 @@
   engine.runRenderLoop(() => scene.render());
   window.addEventListener("resize", () => engine.resize());
 
-  window.LobbyScene = { engine, scene, camera, frames }; // útil para depurar
+  window.LobbyScene = { engine, scene, camera, frames, world, controls }; // útil para depurar
 })();

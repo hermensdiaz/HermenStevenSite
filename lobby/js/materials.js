@@ -90,14 +90,14 @@ Lobby.createMaterials = function (scene) {
 
 /* Cielo con degradado pastel (domo con colores por vértice) */
 Lobby.createSky = function (scene) {
-  const sky = BABYLON.MeshBuilder.CreateSphere("sky", { diameter: 400, segments: 24 }, scene);
+  const sky = BABYLON.MeshBuilder.CreateSphere("sky", { diameter: 2400, segments: 24 }, scene);
   const pos = sky.getVerticesData(BABYLON.VertexBuffer.PositionKind);
   const top = BABYLON.Color3.FromHexString("#7cc3f5");
   const mid = BABYLON.Color3.FromHexString("#cfe8fb");
   const hor = BABYLON.Color3.FromHexString("#fde4ec");
   const colors = [];
   for (let i = 0; i < pos.length; i += 3) {
-    const t = pos[i + 1] / 200; // -1 abajo … 1 arriba
+    const t = pos[i + 1] / 1200; // -1 abajo … 1 arriba
     let c;
     if (t > 0.35) c = BABYLON.Color3.Lerp(mid, top, Math.min(1, (t - 0.35) / 0.65));
     else if (t > 0) c = BABYLON.Color3.Lerp(hor, mid, t / 0.35);
@@ -116,3 +116,23 @@ Lobby.createSky = function (scene) {
   sky.infiniteDistance = true;
   return sky;
 };
+
+/* Material soft reutilizable por color (para el mapa y las maravillas) */
+Lobby.softMat = (function () {
+  const cache = {};
+  return function (scene, hex, opts) {
+    opts = opts || {};
+    const key = hex + (opts.alpha ? "_a" + opts.alpha : "") + (opts.glow ? "_g" : "") + (opts.vcol ? "_v" : "");
+    if (cache[key] && cache[key].getScene() === scene) return cache[key];
+    const m = new BABYLON.StandardMaterial("soft_" + key, scene);
+    const c = BABYLON.Color3.FromHexString(hex);
+    m.diffuseColor = opts.vcol ? BABYLON.Color3.White() : c;
+    m.emissiveColor = opts.glow ? c.scale(0.6) : (opts.vcol ? new BABYLON.Color3(0.06, 0.06, 0.06) : c.scale(0.12));
+    m.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+    m.specularPower = 8;
+    m.maxSimultaneousLights = 6;
+    if (opts.alpha) m.alpha = opts.alpha;
+    cache[key] = m;
+    return m;
+  };
+})();

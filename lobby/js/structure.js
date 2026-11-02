@@ -90,14 +90,6 @@ Lobby.buildStructure = function (scene, M, shadowGen) {
   const bayX = [];
   for (let i = 0; i <= D.bays; i++) bayX.push(X0 + i * D.bay);
 
-  /* ---------- Suelo exterior ---------- */
-  const ground = BABYLON.MeshBuilder.CreateDisc("ground", { radius: 90, tessellation: 64 }, scene);
-  ground.rotation.x = Math.PI / 2;
-  ground.position.y = -D.stilt;
-  ground.material = M.ground;
-  ground.receiveShadows = true;
-  ground.isPickable = false;
-
   /* ---------- Piso ---------- */
   box("floor", X0 - 0.2, X1 + 0.2, -0.28, 0, ZF - 0.2, ZB + 0.2, M.floor, true);
   rbox("rimFront", X0 - 0.25, X1 + 0.25, -0.7, -0.22, ZF - 0.25, ZF + 0.1, M.beam);
@@ -109,7 +101,7 @@ Lobby.buildStructure = function (scene, M, shadowGen) {
   /* ---------- Pilotes ---------- */
   bayX.forEach((x, i) => {
     [ZF, 0, ZB].forEach((z, j) => {
-      rbox(`stilt_${i}_${j}`, x - p, x + p, -D.stilt, -0.3, z - p, z + p, M.post);
+      rbox(`stilt_${i}_${j}`, x - p, x + p, -D.stilt, -0.3, z - p, z + p, M.post, true);
     });
   });
 
@@ -194,7 +186,7 @@ Lobby.buildStructure = function (scene, M, shadowGen) {
     [LX1 - lp, LZ0 + 1.6]   // medio del lado exterior
   ];
   landingPosts.forEach(([x, z], k) => {
-    rbox(`landPost_${k}`, x - lp, x + lp, -D.stilt, RAIL_H + 0.1, z - lp, z + lp, M.post);
+    rbox(`landPost_${k}`, x - lp, x + lp, -D.stilt, RAIL_H + 0.1, z - lp, z + lp, M.post, true);
   });
 
   // escalera: baja hacia el frente (−Z) desde el borde del descanso
@@ -213,11 +205,11 @@ Lobby.buildStructure = function (scene, M, shadowGen) {
     // larguero bajo los peldaños
     rbeam(`stringer_${k}`, V(x, -0.12, LZ0 + 0.05), V(x, -D.stilt + 0.05, zEnd - 0.05), 0.09, 0.32, M.beam);
     // poste de arranque (arriba) y de remate (abajo)
-    rbox(`newelTop_${k}`, x - 0.08, x + 0.08, -0.3, RAIL_H + 0.12, LZ0 - 0.08, LZ0 + 0.08, M.post);
-    rbox(`newelBot_${k}`, x - 0.08, x + 0.08, -D.stilt, -D.stilt + RAIL_H + 0.12, zEnd - 0.08, zEnd + 0.08, M.post);
+    rbox(`newelTop_${k}`, x - 0.08, x + 0.08, -0.3, RAIL_H + 0.12, LZ0 - 0.08, LZ0 + 0.08, M.post, true);
+    rbox(`newelBot_${k}`, x - 0.08, x + 0.08, -D.stilt, -D.stilt + RAIL_H + 0.12, zEnd - 0.08, zEnd + 0.08, M.post, true);
     // pasamanos y travesaño medio de punta a punta
-    rbeam(`handrail_${k}`, V(x, RAIL_H + 0.04, LZ0), V(x, -D.stilt + RAIL_H + 0.04, zEnd), 0.1, 0.08, M.beam);
-    rbeam(`midrail_${k}`, V(x, MID_H, LZ0), V(x, -D.stilt + MID_H, zEnd), 0.06, 0.06, M.beam);
+    rbeam(`handrail_${k}`, V(x, RAIL_H + 0.04, LZ0), V(x, -D.stilt + RAIL_H + 0.04, zEnd), 0.1, 0.08, M.beam, true);
+    rbeam(`midrail_${k}`, V(x, MID_H, LZ0), V(x, -D.stilt + MID_H, zEnd), 0.06, 0.06, M.beam, true);
     // balaustres en cada peldaño
     for (let s = 1; s < steps; s++) {
       const zc = LZ0 - (s - 0.5) * run;
@@ -240,7 +232,17 @@ Lobby.buildStructure = function (scene, M, shadowGen) {
   landingRail("railOuter", V(LX1 - lp, 0, LZ0 + 0.05), V(LX1 - lp, 0, LZ1 - lp));
 
   /* ---------- Colisiones invisibles ---------- */
-  invisibleWall("stairBlock", SX1 - SX0 + 0.4, 3, 0.2, (SX0 + SX1) / 2, 1.5, LZ0 - 0.1);
+  // rampa invisible sobre los peldaños: permite bajar y subir caminando
+  const walkables = [];
+  const ramp = BABYLON.MeshBuilder.CreateRibbon("stairRamp", {
+    pathArray: [
+      [V(SX0, 0.02, LZ0 + 0.3), V(SX0, -D.stilt + 0.02, zEnd), V(SX0, -D.stilt + 0.02, zEnd - 1.5)],
+      [V(SX1, 0.02, LZ0 + 0.3), V(SX1, -D.stilt + 0.02, zEnd), V(SX1, -D.stilt + 0.02, zEnd - 1.5)]
+    ],
+    sideOrientation: BABYLON.Mesh.DOUBLESIDE
+  }, scene);
+  ramp.isVisible = false; ramp.isPickable = true; ramp.metadata = { walk: true };
+  walkables.push(ramp);
   invisibleWall("invFront", D.length, 6, 0.2, 0, 3, ZF - 0.1);
   invisibleWall("invLeft", 0.2, 6, D.depth, X0 - 0.1, 3, 0);
   invisibleWall("invLandOuter", 0.2, 6, LZ1 - LZ0, LX1, 3, (LZ0 + LZ1) / 2);
@@ -256,6 +258,7 @@ Lobby.buildStructure = function (scene, M, shadowGen) {
     merged.receiveShadows = true;
     merged.isPickable = true;
     if (b.collide) { merged.checkCollisions = true; colliders.push(merged); }
+    if (b.material === M.floor && b.collide) { merged.metadata = { walk: true }; walkables.push(merged); }
     if (shadowGen) shadowGen.addShadowCaster(merged);
     meshes.push(merged);
   });
@@ -266,7 +269,8 @@ Lobby.buildStructure = function (scene, M, shadowGen) {
     backWallInnerZ: ZB - D.wallT / 2,
     bayX,
     colliders,
+    walkables,
     meshes,
-    ground
+    stairBottom: new BABYLON.Vector3((SX0 + SX1) / 2, -D.stilt, zEnd - 1)
   };
 };

@@ -39,3 +39,44 @@ Lobby.Shapes = (function () {
 
   return { roundedBox, beam };
 })();
+
+/* =========================================================
+   LOTE DE MESHES: junta piezas por material para dibujar rápido.
+   add(mesh, material, { collide, walk, cast })
+   - collide: bloquea al jugador
+   - walk:    se puede caminar encima (el jugador sigue su altura)
+   - cast:    proyecta sombra (true por defecto)
+   ========================================================= */
+Lobby.Batch = function (scene, shadowGen, name) {
+  const groups = {};
+  const out = { meshes: [], colliders: [], walkables: [] };
+
+  function add(mesh, material, opts) {
+    opts = opts || {};
+    const key = material.name + (opts.collide ? "|c" : "") + (opts.walk ? "|w" : "") + (opts.cast === false ? "|n" : "");
+    (groups[key] = groups[key] || { material, opts, list: [] }).list.push(mesh);
+    return mesh;
+  }
+
+  function flush() {
+    Object.keys(groups).forEach((key) => {
+      const g = groups[key];
+      const merged = g.list.length === 1 && !g.list[0].parent
+        ? g.list[0]
+        : BABYLON.Mesh.MergeMeshes(g.list, true, true, undefined, false, false);
+      merged.name = (name || "batch") + "_" + key;
+      merged.material = g.material;
+      merged.receiveShadows = true;
+      merged.isPickable = !!(g.opts.collide || g.opts.walk || g.opts.pick);
+      merged.metadata = Object.assign({}, merged.metadata, { walk: !!g.opts.walk });
+      merged.freezeWorldMatrix();
+      if (g.opts.collide) { merged.checkCollisions = true; out.colliders.push(merged); }
+      if (g.opts.walk) out.walkables.push(merged);
+      if (shadowGen && g.opts.cast !== false) shadowGen.addShadowCaster(merged);
+      out.meshes.push(merged);
+    });
+    return out;
+  }
+
+  return { add, flush, out };
+};

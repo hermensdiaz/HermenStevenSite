@@ -15,7 +15,7 @@
   <div id="loader">
     <div class="loader-box">
       <div class="blob"><span></span><span></span><span></span></div>
-      <p>Construyendo el lobby…</p>
+      <p>Construyendo el lobby y el mundo…</p>
     </div>
   </div>
 
@@ -25,13 +25,20 @@
     <span class="tag">Lobby</span>
   </header>
 
-  <!-- Menú de secciones -->
+  <!-- Menú de secciones y tour -->
   <nav class="menu" aria-label="Secciones">
     <details open>
       <summary>Secciones</summary>
       <ul id="menuList"></ul>
     </details>
+    <details class="tour">
+      <summary>Tour · 7 maravillas</summary>
+      <ul id="tourList"></ul>
+    </details>
   </nav>
+
+  <!-- Indicador al estar afuera -->
+  <div id="outsideChip">🌿 Explorando · <kbd>Shift</kbd> para correr</div>
 
   <!-- Ayuda de controles -->
   <div id="hint">
@@ -39,9 +46,10 @@
       <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> caminar</span>
       <span><b>Arrastra</b> para mirar</span>
       <span><b>Clic</b> en un cuadro para entrar</span>
+      <span><b>Sal</b> por la puerta derecha para explorar</span>
     </div>
     <div class="hint-touch">
-      <span>Joystick para caminar · arrastra para mirar · toca un cuadro</span>
+      <span>Joystick para caminar · arrastra para mirar · toca un cuadro · sal por la puerta derecha para explorar</span>
     </div>
   </div>
 
@@ -53,6 +61,9 @@
 
   <!-- Joystick táctil -->
   <div id="joystick" aria-hidden="true"><div class="knob"></div></div>
+
+  <!-- Parpadeo del teletransporte -->
+  <div id="blink"></div>
 
   <!-- Transición al entrar a una sección -->
   <div id="fade">
@@ -70,6 +81,9 @@
   <script src="lobby/js/materials.js"></script>
   <script src="lobby/js/structure.js"></script>
   <script src="lobby/js/decor.js"></script>
+  <script src="lobby/js/wonders-data.js"></script>
+  <script src="lobby/js/wonders.js"></script>
+  <script src="lobby/js/world.js"></script>
   <script src="lobby/js/frames.js"></script>
   <script src="lobby/js/controls.js"></script>
   <script src="lobby/js/main.js"></script>

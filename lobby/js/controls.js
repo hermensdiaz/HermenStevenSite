@@ -1,10 +1,11 @@
 /* =========================================================
    CONTROLES: caminar (WASD / flechas / joystick táctil),
-   mirar arrastrando, hover y clic sobre los cuadros
+   correr (Shift), mirar arrastrando, seguir el terreno al salir
+   de la cabaña, hover y clic sobre los cuadros, teletransporte
    ========================================================= */
 window.Lobby = window.Lobby || {};
 
-Lobby.setupControls = function (scene, canvas, camera, frames, ui) {
+Lobby.setupControls = function (scene, canvas, camera, frames, ui, world, structure) {
   const EYE = 1.7;
   const LOOK_SENS = 0.0042;
   let busy = false; // durante la animación de entrada
@@ -22,13 +23,74 @@ Lobby.setupControls = function (scene, canvas, camera, frames, ui) {
   camera.minZ = 0.05;
   camera.checkCollisions = true;
   camera.applyGravity = false;
-  camera.ellipsoid = new BABYLON.Vector3(0.35, 0.85, 0.35);
+  // cuerpo del jugador: de los pies (ojos − 1.2) a los ojos
+  camera.ellipsoid = new BABYLON.Vector3(0.35, 0.6, 0.35);
+  camera.ellipsoidOffset = new BABYLON.Vector3(0, -0.6, 0);
   camera.attachControl(canvas, true);
 
-  // mantener la altura de los ojos
+  /* ---------- Correr con Shift ---------- */
+  const BASE_SPEED = camera.speed;
+  let running = false;
+  const setRun = (on) => { running = on; camera.speed = BASE_SPEED * (on ? 2.8 : 1); };
+  window.addEventListener("keydown", (e) => { if (e.key === "Shift") setRun(true); });
+  window.addEventListener("keyup", (e) => { if (e.key === "Shift") setRun(false); });
+  window.addEventListener("blur", () => setRun(false));
+
+  /* ---------- Seguir el suelo: cabaña, escalera, puente, cerro o terreno ---------- */
+  const walkSet = new Set([...(structure.walkables || []), ...(world.walkables || [])]);
+  const ray = new BABYLON.Ray(BABYLON.Vector3.Zero(), new BABYLON.Vector3(0, -1, 0), 80);
+  const prev = camera.position.clone();
+  let vy = 0;
+
+  function floorAt(x, y, z) {
+    ray.origin.set(x, y + 0.35, z);
+    const hit = scene.pickWithRay(ray, (m) => walkSet.has(m));
+    const structY = hit && hit.hit ? hit.pickedPoint.y : -Infinity;
+    const terrY = world.heightAt(x, z);
+    if (structY >= terrY - 0.05) return { y: structY, water: false };
+    return { y: terrY, water: world.waterAt(x, z) };
+  }
+
   scene.onBeforeRenderObservable.add(() => {
-    camera.position.y = EYE;
     camera.cameraDirection.y = 0;
+    const p = camera.position;
+    if (busy) { prev.copyFrom(p); return; }
+    const dt = Math.min(0.05, scene.getEngine().getDeltaTime() / 1000);
+
+    // límite del mapa
+    const r = Math.hypot(p.x, p.z);
+    if (r > world.radius) { p.x *= world.radius / r; p.z *= world.radius / r; }
+
+    // árboles, rocas, faroles: empujar hacia afuera
+    const feet = p.y - EYE;
+    if (feet < world.heightAt(p.x, p.z) + 1.5) {
+      for (const o of world.obstacles) {
+        const dx = p.x - o.x, dz = p.z - o.z, min = o.r + 0.35;
+        if (Math.abs(dx) < min && Math.abs(dz) < min) {
+          const d = Math.hypot(dx, dz) || 0.001;
+          if (d < min) { p.x = o.x + (dx / d) * min; p.z = o.z + (dz / d) * min; }
+        }
+      }
+    }
+
+    let f = floorAt(p.x, p.y, p.z);
+    if (f.water) {
+      // no se puede entrar al agua: regresar al último punto seco
+      p.x = prev.x; p.z = prev.z;
+      camera.cameraDirection.x = camera.cameraDirection.z = 0;
+      f = floorAt(p.x, p.y, p.z);
+    }
+    const target = f.y + EYE;
+    if (target >= p.y) {
+      p.y = Math.min(target, p.y + Math.max(0.12, (target - p.y) * 0.45));
+      vy = 0;
+    } else {
+      vy = Math.min(vy + 28 * dt, 30);
+      p.y = Math.max(target, p.y - vy * dt);
+      if (p.y === target) vy = 0;
+    }
+    prev.copyFrom(p);
+    ui.setOutside && ui.setOutside(p.y < 1.0);
   });
 
   /* ---------- Mirar arrastrando (mouse y touch) ---------- */
@@ -104,7 +166,8 @@ Lobby.setupControls = function (scene, canvas, camera, frames, ui) {
   }
   scene.onBeforeRenderObservable.add(() => {
     if (busy || (!move.x && !move.y)) return;
-    const k = 0.06 * scene.getAnimationRatio();
+    const boost = Math.hypot(move.x, move.y) > 0.95 ? 2.4 : 1;
+    const k = 0.06 * boost * scene.getAnimationRatio();
     const fwd = camera.getDirection(BABYLON.Axis.Z); fwd.y = 0; fwd.normalize();
     const right = camera.getDirection(BABYLON.Axis.X); right.y = 0; right.normalize();
     camera.cameraDirection.addInPlace(fwd.scale(move.y * k).add(right.scale(move.x * k)));
@@ -157,6 +220,11 @@ Lobby.setupControls = function (scene, canvas, camera, frames, ui) {
 
   /* ---------- Acercarse al cuadro y navegar ---------- */
   function walkTo(frame, done) {
+    // si estás lejos (por ejemplo afuera), te lleva directo frente al cuadro
+    if (BABYLON.Vector3.Distance(camera.position, frame.viewPoint) > 14) {
+      teleport(frame.viewPoint, frame.target, done);
+      return;
+    }
     busy = true;
     setHover(null);
     // cancelar cualquier inercia de movimiento para que no empuje la animación
@@ -222,7 +290,26 @@ Lobby.setupControls = function (scene, canvas, camera, frames, ui) {
     ui.setNear(f ? f.section : null);
   });
 
-  return { enterSection, walkTo, reset() { busy = false; } };
+  /* ---------- Teletransporte (tour por el mapa) ---------- */
+  function teleport(pos, target, done) {
+    if (busy) return;
+    busy = true;
+    setHover(null);
+    camera.cameraDirection.setAll(0);
+    camera.cameraRotation.setAll(0);
+    ui.blink(() => {
+      camera.position.copyFrom(pos);
+      const d = target.subtract(pos);
+      camera.rotation.y = Math.atan2(d.x, d.z);
+      camera.rotation.x = clamp(-Math.atan2(d.y, Math.hypot(d.x, d.z)), -0.9, 0.9);
+      prev.copyFrom(pos);
+      vy = 0;
+      busy = false;
+      done && done();
+    });
+  }
+
+  return { enterSection, walkTo, teleport, reset() { busy = false; } };
 
   function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
 };
