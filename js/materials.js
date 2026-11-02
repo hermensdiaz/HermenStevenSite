@@ -1,99 +1,118 @@
 /* =========================================================
-   MATERIALES: madera procedural (sin texturas externas)
+   MATERIALES SOFT 3D
+   Colores pastel mate, sin brillo duro. Para cambiar el estilo
+   basta con editar la paleta PALETTE.
    ========================================================= */
 window.Lobby = window.Lobby || {};
 
+Lobby.PALETTE = {
+  post:   "#c98d63",  // postes y pilotes
+  beam:   "#b47a52",  // vigas, barandales
+  wall:   "#f0d2b0",  // muros
+  floor:  "#e8c39b",  // piso
+  roof:   "#e08a6c",  // techo (terracota suave)
+  ceiling:"#f6dfc6",  // cara interior del techo
+  desk:   "#f7a96b",  // recepción
+  stair:  "#d49a6c",
+  ground: "#9fd6a9",  // pasto menta
+  rug:    "#f4b6a6",
+  leaf:   "#8fd19e",
+  leaf2:  "#b5e3a1",
+  pot:    "#f2a7b8",
+  trunk:  "#b98563",
+  frame:  "#fff7ee",  // marco de los cuadros
+  plate:  "#fff1de"
+};
+
 Lobby.createMaterials = function (scene) {
-  // Genera una textura de vetas de madera en un canvas
-  function woodTexture(name, base, opts) {
-    opts = opts || {};
+  const P = Lobby.PALETTE;
+
+  // textura muy sutil de tablones (solo líneas, el color lo da el material)
+  function plankTex(name, planks, vertical) {
     const size = 512;
     const tex = new BABYLON.DynamicTexture(name, { width: size, height: size }, scene, true);
     const ctx = tex.getContext();
-    const planks = opts.planks || 0;
-
-    ctx.fillStyle = base;
+    ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, size, size);
-
-    // vetas
-    for (let i = 0; i < 260; i++) {
-      const y = Math.random() * size;
-      const alpha = 0.04 + Math.random() * 0.08;
-      ctx.strokeStyle = Math.random() > 0.5
-        ? `rgba(40,20,5,${alpha})`
-        : `rgba(255,220,170,${alpha * 0.6})`;
-      ctx.lineWidth = 1 + Math.random() * 2.5;
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      for (let x = 0; x <= size; x += 32) {
-        ctx.lineTo(x, y + Math.sin(x * 0.01 + i) * (2 + Math.random() * 3));
-      }
-      ctx.stroke();
+    const step = size / planks;
+    for (let i = 0; i < planks; i++) {
+      // variación de tono por tablón
+      const v = 242 + Math.floor(Math.random() * 13);
+      ctx.fillStyle = `rgb(${v},${v},${v})`;
+      if (vertical) ctx.fillRect(i * step, 0, step, size);
+      else ctx.fillRect(0, i * step, size, step);
+      ctx.fillStyle = "rgba(120,90,70,0.28)";
+      if (vertical) ctx.fillRect(i * step, 0, 3, size);
+      else ctx.fillRect(0, i * step, size, 3);
     }
-
-    // nudos
-    for (let k = 0; k < (opts.knots || 3); k++) {
-      const x = Math.random() * size, y = Math.random() * size;
-      const g = ctx.createRadialGradient(x, y, 1, x, y, 10 + Math.random() * 8);
-      g.addColorStop(0, "rgba(30,14,3,0.55)");
-      g.addColorStop(1, "rgba(30,14,3,0)");
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.ellipse(x, y, 18, 7, 0, 0, Math.PI * 2);
-      ctx.fill();
-    }
-
-    // juntas de tablones
-    if (planks) {
-      const h = size / planks;
-      for (let p = 0; p <= planks; p++) {
-        ctx.fillStyle = "rgba(20,10,2,0.55)";
-        ctx.fillRect(0, p * h - 1, size, 3);
-        // cortes alternados
-        const off = (p % 2) * size * 0.5 + size * 0.25;
-        ctx.fillRect(off, p * h, 3, h);
-      }
-    }
-
     tex.update();
     tex.wrapU = tex.wrapV = BABYLON.Texture.WRAP_ADDRESSMODE;
     return tex;
   }
 
-  function mat(name, color, texOpts, uv) {
+  function soft(name, hex, tex, uv) {
     const m = new BABYLON.StandardMaterial(name, scene);
-    m.diffuseTexture = woodTexture(name + "_tex", color, texOpts);
-    m.diffuseTexture.uScale = (uv && uv[0]) || 1;
-    m.diffuseTexture.vScale = (uv && uv[1]) || 1;
-    m.specularColor = new BABYLON.Color3(0.06, 0.04, 0.02);
+    m.diffuseColor = BABYLON.Color3.FromHexString(hex);
+    // un poco de color propio para que las sombras nunca sean negras
+    m.emissiveColor = BABYLON.Color3.FromHexString(hex).scale(0.12);
+    m.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+    m.specularPower = 8;
+    m.maxSimultaneousLights = 6;
+    if (tex) {
+      m.diffuseTexture = tex;
+      tex.uScale = (uv && uv[0]) || 1;
+      tex.vScale = (uv && uv[1]) || 1;
+    }
     return m;
   }
 
   const M = {
-    beam: mat("beamMat", "#5e3712", { knots: 2 }),
-    post: mat("postMat", "#6b3f15", { knots: 2 }),
-    wall: mat("wallMat", "#7a4a1c", { planks: 6, knots: 5 }),
-    floor: mat("floorMat", "#9a6a3c", { planks: 8, knots: 6 }, [6, 2]),
-    roof: mat("roofMat", "#4d2c0e", { planks: 10 }, [6, 2]),
-    desk: mat("deskMat", "#c27a2a", { knots: 1 }),
-    stair: mat("stairMat", "#6e4118", {})
+    post: soft("postMat", P.post),
+    beam: soft("beamMat", P.beam),
+    wall: soft("wallMat", P.wall, plankTex("wallTex", 8, false), [1, 1]),
+    floor: soft("floorMat", P.floor, plankTex("floorTex", 10, false), [1, 4]),
+    roof: soft("roofMat", P.roof),
+    ceiling: soft("ceilMat", P.ceiling, plankTex("ceilTex", 12, true), [6, 1]),
+    desk: soft("deskMat", P.desk),
+    stair: soft("stairMat", P.stair),
+    ground: soft("groundMat", P.ground),
+    rug: soft("rugMat", P.rug),
+    leaf: soft("leafMat", P.leaf),
+    leaf2: soft("leaf2Mat", P.leaf2),
+    pot: soft("potMat", P.pot),
+    trunk: soft("trunkMat", P.trunk),
+    frame: soft("frameMat", P.frame),
+    plate: soft("plateMat", P.plate)
   };
-
-  const ground = new BABYLON.StandardMaterial("groundMat", scene);
-  ground.diffuseColor = new BABYLON.Color3(0.78, 0.8, 0.82);
-  ground.specularColor = BABYLON.Color3.Black();
-  M.ground = ground;
-
-  const frameWood = new BABYLON.StandardMaterial("frameWood", scene);
-  frameWood.diffuseColor = new BABYLON.Color3(0.22, 0.12, 0.04);
-  frameWood.specularColor = new BABYLON.Color3(0.2, 0.15, 0.1);
-  M.frameWood = frameWood;
-
-  const gold = new BABYLON.StandardMaterial("frameGold", scene);
-  gold.diffuseColor = new BABYLON.Color3(0.85, 0.62, 0.22);
-  gold.specularColor = new BABYLON.Color3(0.9, 0.75, 0.4);
-  gold.specularPower = 32;
-  M.gold = gold;
-
+  M.ground.emissiveColor = BABYLON.Color3.FromHexString(P.ground).scale(0.04);
   return M;
+};
+
+/* Cielo con degradado pastel (domo con colores por vértice) */
+Lobby.createSky = function (scene) {
+  const sky = BABYLON.MeshBuilder.CreateSphere("sky", { diameter: 400, segments: 24 }, scene);
+  const pos = sky.getVerticesData(BABYLON.VertexBuffer.PositionKind);
+  const top = BABYLON.Color3.FromHexString("#7cc3f5");
+  const mid = BABYLON.Color3.FromHexString("#cfe8fb");
+  const hor = BABYLON.Color3.FromHexString("#fde4ec");
+  const colors = [];
+  for (let i = 0; i < pos.length; i += 3) {
+    const t = pos[i + 1] / 200; // -1 abajo … 1 arriba
+    let c;
+    if (t > 0.35) c = BABYLON.Color3.Lerp(mid, top, Math.min(1, (t - 0.35) / 0.65));
+    else if (t > 0) c = BABYLON.Color3.Lerp(hor, mid, t / 0.35);
+    else c = hor;
+    colors.push(c.r, c.g, c.b, 1);
+  }
+  sky.setVerticesData(BABYLON.VertexBuffer.ColorKind, colors);
+  const mat = new BABYLON.StandardMaterial("skyMat", scene);
+  mat.emissiveColor = BABYLON.Color3.White();
+  mat.diffuseColor = BABYLON.Color3.Black();
+  mat.disableLighting = true;
+  mat.backFaceCulling = false;
+  mat.fogEnabled = false;
+  sky.material = mat;
+  sky.isPickable = false;
+  sky.infiniteDistance = true;
+  return sky;
 };

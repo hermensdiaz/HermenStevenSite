@@ -159,6 +159,9 @@ Lobby.setupControls = function (scene, canvas, camera, frames, ui) {
   function walkTo(frame, done) {
     busy = true;
     setHover(null);
+    // cancelar cualquier inercia de movimiento para que no empuje la animación
+    camera.cameraDirection.setAll(0);
+    camera.cameraRotation.setAll(0);
     const fps = 60, frames_ = 50;
     const dir = frame.target.subtract(frame.viewPoint);
     const yaw = Math.atan2(dir.x, dir.z);
@@ -175,7 +178,7 @@ Lobby.setupControls = function (scene, canvas, camera, frames, ui) {
     BABYLON.Animation.CreateAndStartAnimation("walkYaw", camera, "rotation.y", fps, frames_,
       startYaw, yaw, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease);
     BABYLON.Animation.CreateAndStartAnimation("walkPitch", camera, "rotation.x", fps, frames_,
-      camera.rotation.x, 0.02, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease, () => { busy = false; done && done(); });
+      camera.rotation.x, 0.02, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease, () => { camera.cameraDirection.setAll(0); busy = false; done && done(); });
   }
 
   function enterSection(frame) {

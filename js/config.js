@@ -16,7 +16,7 @@ window.LOBBY_CONFIG = {
       subtitle: "Jugar ahora",
       icon: "🦣",
       url: "../games/mamuts4ever/index.html",
-      color: "#6c3fc9"
+      color: "#9b8cff"
     },
     {
       id: "survival-mamuts",
@@ -24,7 +24,7 @@ window.LOBBY_CONFIG = {
       subtitle: "Jugar ahora",
       icon: "🏹",
       url: "../games/survival%20mamuts/index.html",
-      color: "#1f7a5a"
+      color: "#5cc98a"
     },
 
     /* ---- Otras secciones (cambia sus url cuando existan) ---- */
@@ -34,7 +34,7 @@ window.LOBBY_CONFIG = {
       subtitle: "Lo que he construido",
       icon: "🛠️",
       url: "proyectos.html",
-      color: "#b5532a"
+      color: "#ff9f80"
     },
     {
       id: "blog",
@@ -42,7 +42,7 @@ window.LOBBY_CONFIG = {
       subtitle: "Notas y tutoriales",
       icon: "📝",
       url: "blog.html",
-      color: "#2a5fb5"
+      color: "#6fb4ff"
     },
     {
       id: "sobre-mi",
@@ -50,7 +50,7 @@ window.LOBBY_CONFIG = {
       subtitle: "Quién soy",
       icon: "👤",
       url: "sobre-mi.html",
-      color: "#8a2a6a"
+      color: "#f08cb8"
     },
     {
       id: "contacto",
@@ -58,7 +58,7 @@ window.LOBBY_CONFIG = {
       subtitle: "Escríbeme",
       icon: "✉️",
       url: "contacto.html",
-      color: "#a07a14",
+      color: "#f5c451",
       newTab: false // pon true para abrir en otra pestaña
     }
   ]

@@ -1,7 +1,7 @@
 /* =========================================================
    MAIN: motor, escena, luces y arranque del lobby
    ========================================================= */
-(function () {
+(async function () {
   const cfg = window.LOBBY_CONFIG;
   const canvas = document.getElementById("renderCanvas");
   const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true }, true);
@@ -51,77 +51,85 @@
     menu.appendChild(li);
   });
 
+  /* ---------- Fuente redondeada para los cuadros (Nunito) ---------- */
+  try {
+    await Promise.race([
+      Promise.all([
+        document.fonts.load("900 100px Nunito"),
+        document.fonts.load("800 40px Nunito")
+      ]),
+      new Promise((r) => setTimeout(r, 2500)) // si no carga, seguimos con la de respaldo
+    ]);
+  } catch (e) { /* sin fuentes web: se usa la de respaldo */ }
+
   /* ---------- Escena ---------- */
   const scene = new BABYLON.Scene(engine);
-  scene.clearColor = BABYLON.Color4.FromHexString("#9fc4e0ff");
-  scene.ambientColor = new BABYLON.Color3(0.3, 0.25, 0.2);
+  scene.clearColor = BABYLON.Color4.FromHexString("#fde7efff");
   scene.collisionsEnabled = true;
   scene.fogMode = BABYLON.Scene.FOGMODE_EXP2;
-  scene.fogDensity = 0.012;
-  scene.fogColor = new BABYLON.Color3(0.72, 0.8, 0.86);
+  scene.fogDensity = 0.0035;
+  scene.fogColor = BABYLON.Color3.FromHexString("#e4f1fb");
 
-  // luz de cielo
-  const hemi = new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0.2, 1, -0.3), scene);
-  hemi.intensity = 0.55;
-  hemi.diffuse = new BABYLON.Color3(1, 0.95, 0.88);
-  hemi.groundColor = new BABYLON.Color3(0.35, 0.26, 0.18);
+  Lobby.createSky(scene);
 
-  // sol que entra por los ventanales (sombras como en tu render)
-  const sun = new BABYLON.DirectionalLight("sun", new BABYLON.Vector3(0.35, -0.55, 0.75), scene);
-  sun.position = new BABYLON.Vector3(-8, 14, -18);
-  sun.intensity = 1.45;
-  sun.diffuse = new BABYLON.Color3(1, 0.9, 0.75);
+  // luz de cielo: fuerte y cálida, el suelo rebota color durazno (sombras sin negro)
+  const hemi = new BABYLON.HemisphericLight("hemi", new BABYLON.Vector3(0.15, 1, -0.35), scene);
+  hemi.intensity = 0.68;
+  hemi.diffuse = BABYLON.Color3.FromHexString("#fff6ec");
+  hemi.groundColor = BABYLON.Color3.FromHexString("#e9b99a");
+  hemi.specular = BABYLON.Color3.Black();
+
+  // sol suave que entra por los ventanales
+  const sun = new BABYLON.DirectionalLight("sun", new BABYLON.Vector3(0.35, -0.6, 0.72), scene);
+  sun.position = new BABYLON.Vector3(-8, 16, -20);
+  sun.intensity = 0.75;
+  sun.diffuse = BABYLON.Color3.FromHexString("#fff1de");
+  sun.specular = BABYLON.Color3.Black();
+  sun.shadowMinZ = 1;
+  sun.shadowMaxZ = 60;
   const shadows = new BABYLON.ShadowGenerator(2048, sun);
   shadows.usePercentageCloserFiltering = true;
-  shadows.filteringQuality = BABYLON.ShadowGenerator.QUALITY_MEDIUM;
-  shadows.bias = 0.0008;
-  shadows.normalBias = 0.02;
-
-  // lámparas interiores cálidas
-  [-8, 0, 8].forEach((x, i) => {
-    const pl = new BABYLON.PointLight("lamp" + i, new BABYLON.Vector3(x, 3.2, 0.6), scene);
-    pl.diffuse = new BABYLON.Color3(1, 0.78, 0.5);
-    pl.intensity = 0.28;
-    pl.range = 9;
-  });
+  shadows.filteringQuality = BABYLON.ShadowGenerator.QUALITY_HIGH;
+  shadows.setDarkness(0.45);          // sombras claras, estilo soft
+  shadows.bias = 0.001;
+  shadows.normalBias = 0.03;
 
   const M = Lobby.createMaterials(scene);
   const S = Lobby.buildStructure(scene, M, shadows);
+  const decor = Lobby.buildDecor(scene, M, S, shadows);
   const frames = Lobby.buildFrames(scene, M, S, cfg.sections);
 
-  // focos de lámparas colgantes visibles
-  [-8, 0, 8].forEach((x, i) => {
-    const cord = BABYLON.MeshBuilder.CreateCylinder("cord" + i, { height: 0.6, diameter: 0.02 }, scene);
-    cord.position.set(x, S.heightAt(0.6) - 0.3, 0.6);
-    cord.material = M.frameWood;
-    const shade = BABYLON.MeshBuilder.CreateCylinder("shade" + i,
-      { height: 0.28, diameterTop: 0.12, diameterBottom: 0.5, tessellation: 20 }, scene);
-    shade.position.set(x, S.heightAt(0.6) - 0.72, 0.6);
-    shade.material = M.frameWood;
-    const bulb = BABYLON.MeshBuilder.CreateSphere("bulb" + i, { diameter: 0.16 }, scene);
-    bulb.position.set(x, S.heightAt(0.6) - 0.86, 0.6);
-    const bm = new BABYLON.StandardMaterial("bulbMat" + i, scene);
-    bm.emissiveColor = new BABYLON.Color3(1, 0.85, 0.55);
-    bulb.material = bm;
-    [cord, shade, bulb].forEach((m) => (m.isPickable = false));
-  });
-
-  // post-proceso suave
-  const pipe = new BABYLON.DefaultRenderingPipeline("pipe", true, scene);
-  pipe.fxaaEnabled = true;
-  pipe.imageProcessingEnabled = true;
-  pipe.imageProcessing.contrast = 1.12;
-  pipe.imageProcessing.exposure = 1.05;
-  pipe.imageProcessing.vignetteEnabled = true;
-  pipe.imageProcessing.vignetteWeight = 1.4;
-  pipe.imageProcessing.toneMappingEnabled = true;
-  pipe.imageProcessing.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
-
-  /* ---------- Cámara: inicio junto a la recepción mirando el pasillo ---------- */
+  /* ---------- Post-proceso soft: oclusión ambiental + tonos suaves ---------- */
   const camera = new BABYLON.UniversalCamera("cam",
-    new BABYLON.Vector3(S.bounds.X0 + 3.4, 1.7, -2.6), scene);
-  camera.rotation.set(0.04, 0.35, 0);
+    new BABYLON.Vector3(S.bounds.X0 + 3.2, 1.7, -2.7), scene);
+  camera.rotation.set(0.03, 0.25, 0);
   camera.fov = 1.05;
+
+  if (BABYLON.SSAO2RenderingPipeline && BABYLON.SSAO2RenderingPipeline.IsSupported) {
+    const ssao = new BABYLON.SSAO2RenderingPipeline("ssao", scene, { ssaoRatio: 0.5, blurRatio: 0.5 }, [camera]);
+    ssao.radius = 1.2;
+    ssao.totalStrength = 1.1;
+    ssao.base = 0.15;
+    ssao.samples = 16;
+    ssao.maxZ = 60;
+    ssao.expensiveBlur = true;
+  }
+
+  const pipe = new BABYLON.DefaultRenderingPipeline("pipe", true, scene, [camera]);
+  pipe.fxaaEnabled = true;
+  pipe.samples = 4;
+  pipe.imageProcessingEnabled = true;
+  pipe.imageProcessing.toneMappingEnabled = false; // colores pastel tal cual
+  pipe.imageProcessing.exposure = 1.0;
+  pipe.imageProcessing.contrast = 1.06;
+  pipe.imageProcessing.vignetteEnabled = true;
+  pipe.imageProcessing.vignetteWeight = 0.8;
+  pipe.imageProcessing.vignetteColor = new BABYLON.Color4(0.55, 0.35, 0.35, 0);
+  pipe.bloomEnabled = true;
+  pipe.bloomThreshold = 0.95;
+  pipe.bloomWeight = 0.12;
+  pipe.bloomKernel = 48;
+
 
   const controls = Lobby.setupControls(scene, canvas, camera, frames, ui);
 

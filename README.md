@@ -1,4 +1,4 @@
-# Lobby 3D (Babylon.js)
+# Lobby 3D soft (Babylon.js)
 
 Interior navegable de la cabaña sobre pilotes, hecho con Babylon.js.
 Cada cuadro del muro trasero es una sección del sitio.
@@ -11,8 +11,10 @@ lobby/
 ├── css/styles.css      → estilos del HUD, menú, joystick, transición
 └── js/
     ├── config.js       → nombre del sitio y secciones (EDITA AQUÍ)
-    ├── materials.js    → madera procedural
+    ├── shapes.js       → cajas y vigas con bordes redondeados (soft 3D)
+    ├── materials.js    → paleta pastel (Lobby.PALETTE) y cielo
     ├── structure.js    → la cabaña (medidas en Lobby.DIM)
+    ├── decor.js        → alfombra, bancas, plantas, lámparas, árboles
     ├── frames.js       → los cuadros clicables
     ├── controls.js     → caminar, mirar, hover y clic
     └── main.js         → escena, luces, cámara y arranque
@@ -51,3 +53,8 @@ Las medidas están en `Lobby.DIM` (structure.js): `bays`, `bay`, `depth`,
 `frontH`, `backH`, `sill`, etc. Si prefieres usar tu modelo exacto,
 expórtalo como `.glb` y cárgalo con `BABYLON.SceneLoader.ImportMeshAsync`
 en lugar de `Lobby.buildStructure` (los cuadros solo necesitan la Z del muro trasero).
+
+## Cambiar los colores
+
+Toda la paleta está en `Lobby.PALETTE` (materials.js). El color de cada
+cuadro sale de `color` en config.js.

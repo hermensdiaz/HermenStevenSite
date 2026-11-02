@@ -22,75 +22,81 @@ Lobby.buildFrames = function (scene, M, S, sections) {
     const root = new BABYLON.TransformNode("frame_" + sec.id, scene);
     root.position.set(x, centerY, z);
 
-    // marco dorado + fondo
-    const border = 0.09;
-    const back = BABYLON.MeshBuilder.CreateBox("frameBack_" + sec.id,
-      { width: W + border * 2, height: H + border * 2, depth: 0.06 }, scene);
-    back.material = M.gold;
-    back.position.z = -0.03;
+    const { roundedBox } = Lobby.Shapes;
+    const accent = BABYLON.Color3.FromHexString(sec.color || "#9b8cff");
+
+    // marco redondeado color crema + filete de color de la sección
+    const border = 0.14;
+    const back = roundedBox("frameBack_" + sec.id, W + border * 2, H + border * 2, 0.12, 0.08, scene);
+    back.material = M.frame;
+    back.position.z = -0.06;
     back.parent = root;
 
-    const inner = BABYLON.MeshBuilder.CreateBox("frameInner_" + sec.id,
-      { width: W + 0.02, height: H + 0.02, depth: 0.065 }, scene);
-    inner.material = M.frameWood;
-    inner.position.z = -0.04;
+    const inner = roundedBox("frameInner_" + sec.id, W + 0.07, H + 0.07, 0.1, 0.04, scene);
+    const innerMat = new BABYLON.StandardMaterial("frameInnerMat_" + sec.id, scene);
+    innerMat.diffuseColor = accent;
+    innerMat.emissiveColor = accent.scale(0.3);
+    innerMat.specularColor = new BABYLON.Color3(0.05, 0.05, 0.05);
+    inner.material = innerMat;
+    inner.position.z = -0.09;
     inner.parent = root;
 
     // lienzo con la sección dibujada
     const canvas = BABYLON.MeshBuilder.CreatePlane("frameArt_" + sec.id, { width: W, height: H }, scene);
-    canvas.position.z = -0.08;
+    canvas.position.z = -0.145;
     canvas.parent = root;
-    const tex = new BABYLON.DynamicTexture("artTex_" + sec.id, { width: 768, height: 552 }, scene, true);
+    const tex = new BABYLON.DynamicTexture("artTex_" + sec.id, { width: 1024, height: 736 }, scene, true);
     drawArt(tex, sec);
     const mat = new BABYLON.StandardMaterial("artMat_" + sec.id, scene);
     mat.diffuseTexture = tex;
     mat.emissiveTexture = tex;
-    mat.emissiveColor = new BABYLON.Color3(0.55, 0.55, 0.55);
-    mat.specularColor = new BABYLON.Color3(0.1, 0.1, 0.1);
+    mat.emissiveColor = new BABYLON.Color3(0.38, 0.38, 0.38);
+    mat.specularColor = new BABYLON.Color3(0.04, 0.04, 0.04);
+    mat.maxSimultaneousLights = 6;
     canvas.material = mat;
 
-    // placa con el nombre debajo del cuadro
-    const plate = BABYLON.MeshBuilder.CreatePlane("plate_" + sec.id, { width: 0.9, height: 0.18 }, scene);
-    plate.position.set(0, -H / 2 - 0.28, -0.03);
+    // placa redondeada con el nombre, debajo del cuadro
+    const plateBody = roundedBox("plateBody_" + sec.id, 1.36, 0.3, 0.06, 0.1, scene);
+    plateBody.material = M.plate;
+    plateBody.position.set(0, -H / 2 - 0.36, -0.06);
+    plateBody.parent = root;
+    const plate = BABYLON.MeshBuilder.CreatePlane("plate_" + sec.id, { width: 1.24, height: 0.24 }, scene);
+    plate.position.set(0, -H / 2 - 0.36, -0.095);
     plate.parent = root;
-    const pTex = new BABYLON.DynamicTexture("plateTex_" + sec.id, { width: 512, height: 102 }, scene, true);
+    const pTex = new BABYLON.DynamicTexture("plateTex_" + sec.id, { width: 620, height: 120 }, scene, true);
+    pTex.hasAlpha = true;
     const pc = pTex.getContext();
-    const g = pc.createLinearGradient(0, 0, 0, 102);
-    g.addColorStop(0, "#e9c56b"); g.addColorStop(1, "#a7792c");
-    pc.fillStyle = g; pc.fillRect(0, 0, 512, 102);
-    pc.fillStyle = "#3a2408";
-    pc.font = "600 46px Georgia, serif";
+    pc.clearRect(0, 0, 620, 120);
+    pc.fillStyle = "#4a2f25";
     pc.textAlign = "center"; pc.textBaseline = "middle";
-    pc.fillText(sec.title, 256, 54);
+    let ps = 60;
+    do { pc.font = `800 ${ps}px Nunito, 'Trebuchet MS', sans-serif`; ps -= 2; }
+    while (pc.measureText(sec.title).width > 580 && ps > 24);
+    pc.fillText(sec.title, 310, 64);
     pTex.update();
     const pMat = new BABYLON.StandardMaterial("plateMat_" + sec.id, scene);
     pMat.diffuseTexture = pTex;
-    pMat.emissiveColor = new BABYLON.Color3(0.25, 0.22, 0.15);
+    pMat.useAlphaFromDiffuseTexture = true;
+    pMat.emissiveColor = new BABYLON.Color3(0.08, 0.06, 0.05);
+    pMat.specularColor = BABYLON.Color3.Black();
     plate.material = pMat;
 
-    // lámpara de galería sobre el cuadro
-    const lamp = BABYLON.MeshBuilder.CreateBox("lamp_" + sec.id, { width: 0.5, height: 0.06, depth: 0.08 }, scene);
-    lamp.position.set(0, H / 2 + 0.28, -0.18);
+    // lamparita redondeada sobre el cuadro
+    const lamp = roundedBox("lamp_" + sec.id, 0.6, 0.1, 0.14, 0.05, scene);
+    lamp.position.set(0, H / 2 + 0.34, -0.26);
     lamp.parent = root;
     const lampMat = new BABYLON.StandardMaterial("lampMat_" + sec.id, scene);
-    lampMat.diffuseColor = new BABYLON.Color3(0.1, 0.1, 0.1);
-    lampMat.emissiveColor = new BABYLON.Color3(1, 0.85, 0.55);
+    lampMat.emissiveColor = new BABYLON.Color3(1, 0.95, 0.85);
+    lampMat.disableLighting = true;
     lamp.material = lampMat;
-    const arm = BABYLON.MeshBuilder.CreateBox("lampArm_" + sec.id, { width: 0.04, height: 0.04, depth: 0.16 }, scene);
-    arm.position.set(0, H / 2 + 0.28, -0.08);
+    const arm = roundedBox("lampArm_" + sec.id, 0.05, 0.05, 0.24, 0.02, scene);
+    arm.position.set(0, H / 2 + 0.34, -0.13);
     arm.parent = root;
-    arm.material = M.frameWood;
-
-    const spot = new BABYLON.SpotLight("spot_" + sec.id,
-      new BABYLON.Vector3(x, centerY + H / 2 + 0.6, z - 0.9),
-      new BABYLON.Vector3(0, -0.75, 0.6).normalize(),
-      Math.PI / 2.6, 6, scene);
-    spot.diffuse = new BABYLON.Color3(1, 0.86, 0.62);
-    spot.intensity = 0.55;
-    spot.range = 5;
+    arm.material = M.beam;
+    [lamp, arm].forEach((m) => (m.isPickable = false));
 
     // todos los meshes del cuadro son clicables
-    const parts = [back, inner, canvas, plate];
+    const parts = [back, inner, canvas, plate, plateBody];
     parts.forEach((m) => {
       m.metadata = { section: sec };
       m.isPickable = true;
@@ -102,63 +108,77 @@ Lobby.buildFrames = function (scene, M, S, sections) {
       parts,
       canvas,
       // punto frente al cuadro para el acercamiento
-      viewPoint: new BABYLON.Vector3(x, 1.7, z - 2.2),
+      viewPoint: new BABYLON.Vector3(x, 1.7, z - 2.4),
       target: new BABYLON.Vector3(x, centerY, z)
     });
   });
 
   return frames;
 
-  /* ---- dibuja el "arte" de cada sección ---- */
+  /* ---- dibuja el "arte" de cada sección (estilo soft) ---- */
   function drawArt(tex, sec) {
     const ctx = tex.getContext();
-    const w = 768, h = 552;
-    const base = sec.color || "#6c3fc9";
+    const w = 1024, h = 736;
+    const base = sec.color || "#9b8cff";
 
-    const grd = ctx.createLinearGradient(0, 0, w, h);
-    grd.addColorStop(0, shade(base, 0.25));
-    grd.addColorStop(1, shade(base, -0.45));
+    // degradado pastel
+    const grd = ctx.createLinearGradient(0, 0, w * 0.6, h);
+    grd.addColorStop(0, shade(base, 0.55));
+    grd.addColorStop(1, shade(base, 0.12));
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, w, h);
 
-    // patrón decorativo
-    ctx.globalAlpha = 0.12;
-    ctx.strokeStyle = "#ffffff";
-    ctx.lineWidth = 2;
-    for (let i = -h; i < w; i += 36) {
-      ctx.beginPath(); ctx.moveTo(i, h); ctx.lineTo(i + h, 0); ctx.stroke();
-    }
-    ctx.globalAlpha = 1;
+    // burbujas suaves de fondo
+    [[0.12, 0.18, 170], [0.9, 0.2, 130], [0.82, 0.88, 210], [0.08, 0.9, 120]].forEach(([bx, by, br]) => {
+      ctx.fillStyle = "rgba(255,255,255,0.22)";
+      ctx.beginPath(); ctx.arc(bx * w, by * h, br, 0, Math.PI * 2); ctx.fill();
+    });
 
-    // viñeta
-    const v = ctx.createRadialGradient(w / 2, h / 2, h * 0.2, w / 2, h / 2, w * 0.7);
-    v.addColorStop(0, "rgba(0,0,0,0)");
-    v.addColorStop(1, "rgba(0,0,0,0.45)");
-    ctx.fillStyle = v;
-    ctx.fillRect(0, 0, w, h);
+    // círculo blanco detrás del icono
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.shadowColor = "rgba(80,50,40,0.18)";
+    ctx.shadowBlur = 30; ctx.shadowOffsetY = 10;
+    ctx.beginPath(); ctx.arc(w / 2, h * 0.36, 150, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
 
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.fillStyle = "#ffffff";
-    ctx.font = "150px 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif";
-    ctx.fillText(sec.icon || "★", w / 2, h * 0.36);
+    ctx.fillStyle = "#000";
+    ctx.font = "170px 'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif";
+    ctx.fillText(sec.icon || "★", w / 2, h * 0.37);
 
+    // título: se achica si es muy largo
     ctx.fillStyle = "#ffffff";
-    ctx.shadowColor = "rgba(0,0,0,0.5)";
-    ctx.shadowBlur = 12;
-    // el título se achica si es muy largo para el cuadro
-    let size = 74;
+    ctx.shadowColor = "rgba(70,40,30,0.28)";
+    ctx.shadowBlur = 16; ctx.shadowOffsetY = 6;
+    let size = 108;
     do {
-      ctx.font = `700 ${size}px 'Trebuchet MS', 'Segoe UI', sans-serif`;
+      ctx.font = `900 ${size}px Nunito, 'Trebuchet MS', sans-serif`;
       size -= 2;
-    } while (ctx.measureText(sec.title).width > w * 0.86 && size > 30);
-    ctx.fillText(sec.title, w / 2, h * 0.68);
-    ctx.font = "400 36px 'Trebuchet MS', 'Segoe UI', sans-serif";
-    ctx.fillStyle = "rgba(255,255,255,0.85)";
-    ctx.fillText(sec.subtitle || "", w / 2, h * 0.82);
-    ctx.shadowBlur = 0;
+    } while (ctx.measureText(sec.title).width > w * 0.86 && size > 40);
+    ctx.fillText(sec.title, w / 2, h * 0.73);
 
+    // subtítulo en una pastilla
+    if (sec.subtitle) {
+      ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+      ctx.font = "800 40px Nunito, 'Trebuchet MS', sans-serif";
+      const tw = ctx.measureText(sec.subtitle).width + 64;
+      ctx.fillStyle = "rgba(255,255,255,0.9)";
+      pill(ctx, w / 2 - tw / 2, h * 0.86 - 32, tw, 64, 32);
+      ctx.fillStyle = shade(base, -0.35);
+      ctx.fillText(sec.subtitle, w / 2, h * 0.86 + 2);
+    }
     tex.update();
+  }
+
+  function pill(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.fill();
   }
 
   function shade(hex, amt) {
